@@ -3,11 +3,12 @@ from datetime import datetime
 from datetime import datetime
 import math
 import time
+import sys
 
 import onzo.device
 
-INFLUX_USERNAME = ""
-INFLUX_PASSWORD = ""
+INFLUX_USERNAME = sys.argv[1]
+INFLUX_PASSWORD = sys.argv[2]
 
 def make_json(measurement, value, timestamp):
 
