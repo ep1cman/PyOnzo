@@ -1,6 +1,6 @@
 import struct
 import random
-import usb
+import hid
 import datetime
 from enum import Enum, IntEnum
 from collections import OrderedDict
@@ -51,37 +51,11 @@ class Connection(object):
         self.unit = unit
 
     def connect(self):
-        devices = list(usb.core.find(idVendor=self.vid, idProduct=self.pid, find_all=True))
-        if len(devices) < (self.unit + 1):
-            raise ValueError("Device not connected (unit {})".format(self.unit))
-        self.dev = devices[self.unit]
-
-        self.dev.reset()
-        if self.dev.is_kernel_driver_active(0):
-            self.dev.detach_kernel_driver(0)
-
-        self.dev.set_configuration()
-        config = self.dev.get_active_configuration()
-        interface = config[(0,0)]
-        self.write_end_point = usb.util.find_descriptor(
-            interface,
-            custom_match = \
-                lambda e: \
-                    usb.util.endpoint_direction(e.bEndpointAddress) == \
-                    usb.util.ENDPOINT_OUT
-        )
-
-        self.read_end_point = usb.util.find_descriptor(
-            interface,
-            custom_match = \
-                lambda e: \
-                    usb.util.endpoint_direction(e.bEndpointAddress) == \
-                    usb.util.ENDPOINT_IN
-        )
-        self.connected = True
+        self.dev = hid.device()
+        self.dev.open(vendor_id=self.vid, product_id=self.pid)
 
     def disconnect(self):
-        self.dev.reset()
+        self.dev.close()
 
     # Low level packet framing (64 byte)
     def message_send(self, data):
@@ -95,7 +69,7 @@ class Connection(object):
                     frame_size = len(data)
                     data += b'\xFF' * (62 - len(data))
             header = struct.pack('<BB', frame_fin, frame_size)
-            i = self.write_end_point.write(header + data[:62])
+            i = self.dev.write(header + data[:62])
             if i != 64:  # All writes should be blocks of 64 bytes
                 raise Exception("All bytes were not written")
             data = data[62:]
@@ -103,7 +77,7 @@ class Connection(object):
     def message_receive(self, timeout=5000):
         complete_payload = bytes()
         while True:
-            frame = self.read_end_point.read(64, timeout)
+            frame = bytes(self.dev.read(64, timeout))
             frame_fin, frame_size = struct.unpack('<BB', frame[:2])
             payload = frame[2:(2+frame_size)]  # Remove header & padding
             complete_payload += payload
