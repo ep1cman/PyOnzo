@@ -9,6 +9,11 @@ import onzo.device
 
 INFLUX_USERNAME = sys.argv[1]
 INFLUX_PASSWORD = sys.argv[2]
+INFLUX_ADDR = sys.argv[3]
+if len(sys.argv) == 5:
+    INFLUX_PORT = sys.argv[4]
+else:
+    INFLUX_PORT = 8086
 
 def make_json(measurement, value, timestamp):
 
@@ -22,7 +27,7 @@ def make_json(measurement, value, timestamp):
         }
     ]
 
-db = influxdb.InfluxDBClient(host="172.16.0.254", port=8086, username=INFLUX_USERNAME,
+db = influxdb.InfluxDBClient(host=INFLUX_ADDR, port=INFLUX_PORT, username=INFLUX_USERNAME,
                              password=INFLUX_PASSWORD)
 db.create_database("onzo")
 

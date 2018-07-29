@@ -15,4 +15,4 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 # Run app.py when the container launches
-CMD python influx.py $USER, $PASSWORD
+CMD python influx.py $USER, $PASSWORD $INFLUX_ADDR $INFLUX_PORT
