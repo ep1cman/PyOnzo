@@ -12,6 +12,7 @@ try:
 
     p_reactive = None
     counter = 0
+    print("Timestamp,P_real,P_reactive,P_apparent,kWh,Battery_Voltage")
     while True:
         p_real = clamp.get_power()
 
@@ -26,7 +27,9 @@ try:
         p_apparent = int(math.sqrt(p_real**2 + p_reactive**2))
         ear = clamp.get_cumulative_kwh()
 
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), p_real, p_reactive, p_apparent, ear, battery)
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        print("{},{},{},{},{},{}".format(timestamp, p_real, p_reactive, p_apparent, ear, battery))
 
         counter += 1
         time.sleep(1)
