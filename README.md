@@ -15,7 +15,7 @@ sudo pip install -r requirements.txt
 To get a basic understanding of the meter readings from your Onzo energy meter you can use ``read.py`` script to view data being broadcast over 433Mhz from your energy clamp and then read the data over usb connected to your computer.
 
 ```
-python device.py
+python read.py
 ```
 
 # To Do
